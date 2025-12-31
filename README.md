@@ -1,6 +1,6 @@
 # Web Merge React Component Library
 
-Opinionated React component primitives shipped as a TypeScript library. Build artifacts land under `dist/` and the `Button` component is the exported entry point.
+Opinionated React component primitives shipped as a TypeScript library. Build artifacts land under `dist/` and the `TemplateEditor` component is the exported entry point.
 
 ## Getting started
 
@@ -32,6 +32,5 @@ Opinionated React component primitives shipped as a TypeScript library. Build ar
 - `src/` holds the source implementation.
 - `tsconfig.json` aligns TypeScript with the library output.
 - `tsup.config.ts` controls the bundling targets and declaration generation.
-- Storybook source lives under `.storybook/` with a `Button` story at `src/components/Button.stories.tsx` to document the exported variant options.
-- The template editor story in `src/components/TemplateEditor.stories.tsx` shows how placeholders expose a toggle button at the start (Insert value/Insert section) that switches the insertion mode before you drop the placeholder into the template, keeping the toolbar compact.
+- Storybook source lives under `.storybook/` with the template editor story at `src/components/TemplateEditor.stories.tsx`, which shows how placeholders expose a toggle button at the start (Insert value/Insert section) that switches the insertion mode before you drop the placeholder into the template, keeping the toolbar compact.
 - `src/components/TemplateEditor.tsx` showcases how to edit Mustache-style templates, insert placeholders, and preview conditional sections; documented in `src/components/TemplateEditor.stories.tsx`.

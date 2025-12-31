@@ -8,13 +8,13 @@
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true,
-    "strict": true
+    "strict": true,
   },
   "include": ["src"]
 }
