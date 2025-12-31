@@ -12,6 +12,8 @@ const placeholders: PlaceholderDefinition[] = [
     key: 'responsiblePerson',
     label: 'Responsible person',
     description: 'Safety contact who signs the form.',
+    kind: 'section',
+    sectionContent: `Content goes here`,
     sampleValue: 'Jordan Brooks'
   },
   {
@@ -19,10 +21,7 @@ const placeholders: PlaceholderDefinition[] = [
     label: 'High-risk activity',
     description: 'Controls shown when the activity is classified as high risk.',
     kind: 'section',
-    sectionContent: `{{projectName}} is high risk:
-- Isolate the area.
-- Notify site leadership.
-- Review the RAMS with the team.`,
+    sectionContent: `Content goes here`,
     sampleValue: true
   }
 ];

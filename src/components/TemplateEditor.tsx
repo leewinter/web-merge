@@ -8,6 +8,10 @@ export interface PlaceholderDefinition {
   label: string;
   description?: string;
   sampleValue?: string | boolean | number;
+  /**
+   * Allow this placeholder to be inserted or treated as a section by the editor.
+   */
+  allowSection?: boolean;
   kind?: PlaceholderKind;
   sectionContent?: string;
 }
@@ -45,6 +49,15 @@ const formatSectionToken = (placeholder: PlaceholderDefinition) => {
   return `{{#${placeholder.key}}}${content}{{/${placeholder.key}}}`;
 };
 
+const placeholderSupportsSection = (placeholder: PlaceholderDefinition) =>
+  placeholder.allowSection ?? (Boolean(placeholder.sectionContent) || placeholder.kind === 'section');
+
+const buildInitialModes = (placeholders: PlaceholderDefinition[]) =>
+  placeholders.reduce<Record<string, PlaceholderKind>>((acc, placeholder) => {
+    acc[placeholder.key] = placeholder.kind ?? 'value';
+    return acc;
+  }, {});
+
 const TemplateEditor: React.FC<TemplateEditorProps> = ({
   initialTemplate = '',
   initialValues,
@@ -56,6 +69,9 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   const [values, setValues] = React.useState<Record<string, unknown>>(
     buildInitialValues(placeholders, initialValues)
   );
+  const [placeholderModes, setPlaceholderModes] = React.useState<Record<string, PlaceholderKind>>(
+    () => buildInitialModes(placeholders)
+  );
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   React.useEffect(() => {
@@ -64,6 +80,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
 
   React.useEffect(() => {
     setValues(buildInitialValues(placeholders, initialValues));
+    setPlaceholderModes(buildInitialModes(placeholders));
   }, [initialValues, placeholders]);
 
   const renderedResult = React.useMemo(() => {
@@ -87,9 +104,11 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     });
   };
 
-  const insertToken = (placeholder: PlaceholderDefinition) => {
+const insertToken = (placeholder: PlaceholderDefinition, mode?: PlaceholderKind) => {
+    const currentMode = mode ?? placeholderModes[placeholder.key] ?? placeholder.kind ?? 'value';
+    const supportsSection = placeholderSupportsSection(placeholder);
     const token =
-      placeholder.kind === 'section' ? formatSectionToken(placeholder) : `{{${placeholder.key}}}`;
+      currentMode === 'section' && supportsSection ? formatSectionToken(placeholder) : `{{${placeholder.key}}}`;
     const textarea = textareaRef.current;
     if (!textarea) {
       updateTemplate(`${template}${token}`);
@@ -112,9 +131,35 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   };
 
   const placeholderValues = React.useMemo(
-    () => placeholders.map((placeholder) => ({ ...placeholder, currentValue: values[placeholder.key] })),
-    [placeholders, values]
+    () =>
+      placeholders.map((placeholder) => {
+        const mode = placeholderModes[placeholder.key] ?? placeholder.kind ?? 'value';
+        return {
+          ...placeholder,
+          currentValue: values[placeholder.key],
+          mode,
+          supportsSection: placeholderSupportsSection(placeholder)
+        };
+      }),
+    [placeholders, values, placeholderModes]
   );
+
+  const togglePlaceholderMode = (placeholder: PlaceholderDefinition) => {
+    if (!placeholderSupportsSection(placeholder)) {
+      return;
+    }
+
+    setPlaceholderModes((prev) => {
+      const nextMode = prev[placeholder.key] === 'section' ? 'value' : 'section';
+      if (nextMode === 'section') {
+        setValues((current) => ({
+          ...current,
+          [placeholder.key]: Boolean(String(current[placeholder.key] ?? ''))
+        }));
+      }
+      return { ...prev, [placeholder.key]: nextMode };
+    });
+  };
 
   return (
     <div style={{ display: 'grid', gap: 16 }}>
@@ -134,22 +179,58 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
             padding: 12
           }}
         />
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
-          {placeholders.map((placeholder) => (
-            <button
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginTop: 12,
+            alignItems: 'center'
+          }}
+        >
+          {placeholderValues.map((placeholder) => (
+            <div
               key={placeholder.key}
-              type="button"
-              onClick={() => insertToken(placeholder)}
               style={{
+                display: 'inline-flex',
+                gap: 6,
+                alignItems: 'center',
+                padding: '4px 6px',
                 borderRadius: 999,
-                border: '1px solid #94a3b8',
-                background: '#fff',
-                padding: '6px 12px',
-                cursor: 'pointer'
+                border: '1px solid #e2e8f0',
+                background: '#fff'
               }}
             >
-              {placeholder.kind === 'section' ? `Section: ${placeholder.label}` : placeholder.label}
-            </button>
+              {placeholder.supportsSection && (
+                <button
+                  type="button"
+                  onClick={() => togglePlaceholderMode(placeholder)}
+                  style={{
+                    borderRadius: 999,
+                    border: '1px solid #cbd5f5',
+                    background: placeholder.mode === 'section' ? '#e0f2fe' : '#fff',
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    fontSize: 11
+                  }}
+                >
+                  Insert {placeholder.mode === 'section' ? 'section' : 'value'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => insertToken(placeholder)}
+                style={{
+                  borderRadius: 999,
+                  border: 'none',
+                  background: 'transparent',
+                  padding: '6px 12px',
+                  cursor: 'pointer'
+                }}
+              >
+                {placeholder.label}
+              </button>
+            </div>
           ))}
         </div>
       </section>
@@ -166,7 +247,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
               {placeholder.description && (
                 <span style={{ fontSize: 12, color: '#475569' }}>{placeholder.description}</span>
               )}
-              {placeholder.kind === 'section' ? (
+              {placeholder.mode === 'section' && placeholder.supportsSection ? (
                 <input
                   type="checkbox"
                   checked={Boolean(placeholder.currentValue)}
