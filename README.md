@@ -1,6 +1,6 @@
 # Web Merge React Component Library
 
-Opinionated React component primitives shipped as a TypeScript library. Build artifacts land under `dist/` and the `TemplateEditor` component is the exported entry point.
+Opinionated React component primitives shipped as a TypeScript library. Build artifacts land under `dist/` and the `TemplateEditor` component is the exported entry point; placeholder values originate from your data layer (no inline editing in the canvas).
 
 ## Getting started
 

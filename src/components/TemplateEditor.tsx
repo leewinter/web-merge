@@ -150,15 +150,13 @@ const insertToken = (placeholder: PlaceholderDefinition, mode?: PlaceholderKind)
     }
 
     setPlaceholderModes((prev) => {
-      const nextMode = prev[placeholder.key] === 'section' ? 'value' : 'section';
-      if (nextMode === 'section') {
-        setValues((current) => ({
-          ...current,
-          [placeholder.key]: Boolean(String(current[placeholder.key] ?? ''))
-        }));
-      }
-      return { ...prev, [placeholder.key]: nextMode };
-    });
+    const nextMode = prev[placeholder.key] === 'section' ? 'value' : 'section';
+    if (nextMode === 'section') {
+      const currentValue = values[placeholder.key];
+      updateValue(placeholder.key, Boolean(String(currentValue ?? '')));
+    }
+    return { ...prev, [placeholder.key]: nextMode };
+  });
   };
 
   return (
@@ -231,37 +229,6 @@ const insertToken = (placeholder: PlaceholderDefinition, mode?: PlaceholderKind)
                 {placeholder.label}
               </button>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: 16 }}>
-        <h3 style={{ marginTop: 0 }}>Placeholder values</h3>
-        <div style={{ display: 'grid', gap: 12 }}>
-          {placeholderValues.map((placeholder) => (
-            <label
-              key={`value-${placeholder.key}`}
-              style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}
-            >
-              <span style={{ fontWeight: 600 }}>{placeholder.label}</span>
-              {placeholder.description && (
-                <span style={{ fontSize: 12, color: '#475569' }}>{placeholder.description}</span>
-              )}
-              {placeholder.mode === 'section' && placeholder.supportsSection ? (
-                <input
-                  type="checkbox"
-                  checked={Boolean(placeholder.currentValue)}
-                  onChange={(event) => updateValue(placeholder.key, event.target.checked)}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={String(placeholder.currentValue ?? '')}
-                  onChange={(event) => updateValue(placeholder.key, event.target.value)}
-                  style={{ borderRadius: 4, borderColor: '#cbd5f5', padding: 6 }}
-                />
-              )}
-            </label>
           ))}
         </div>
       </section>
