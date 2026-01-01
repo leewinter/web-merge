@@ -19,7 +19,8 @@ import {
   TableControls,
   SectionList,
   SectionEditorPanel,
-  RenderedPreview
+  RenderedPreview,
+  ExpandablePanel
 } from './TemplateEditorLayout';
 
 const SECTION_WRAPPER_STYLE =
@@ -487,12 +488,16 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
             gap: 16
           }}
         >
-          <PlaceholderControls
-            placeholders={placeholderValues}
-            onToggleMode={togglePlaceholderMode}
-            onInsert={insertToken}
-          />
-          <TableControls onCommand={execCommand} />
+          <ExpandablePanel title="Placeholder controls" defaultExpanded>
+            <PlaceholderControls
+              placeholders={placeholderValues}
+              onToggleMode={togglePlaceholderMode}
+              onInsert={insertToken}
+            />
+          </ExpandablePanel>
+          <ExpandablePanel title="Table controls" defaultExpanded={false}>
+            <TableControls onCommand={execCommand} />
+          </ExpandablePanel>
           {sectionList.length > 0 && <SectionList sections={sectionList} onEdit={startEditingSection} />}
         </div>
         <div

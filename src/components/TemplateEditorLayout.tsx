@@ -20,7 +20,7 @@ export const PlaceholderControls: React.FC<PlaceholderControlsProps> = ({
       flexWrap: 'wrap',
       gap: 12,
       marginTop: 12,
-      alignItems: 'center'
+      alignItems: 'flex-start'
     }}
   >
     {placeholders.map((placeholder) => (
@@ -70,14 +70,72 @@ export const PlaceholderControls: React.FC<PlaceholderControlsProps> = ({
   </div>
 );
 
+interface ExpandablePanelProps {
+  title: string;
+  defaultExpanded?: boolean;
+  children: React.ReactNode;
+}
+
+export const ExpandablePanel: React.FC<ExpandablePanelProps> = ({
+  title,
+  defaultExpanded = true,
+  children
+}) => {
+  const [expanded, setExpanded] = React.useState(defaultExpanded);
+
+  return (
+    <div
+      style={{
+        padding: 12,
+        borderRadius: 6,
+        border: '1px solid #e5e7eb',
+        background: '#f8fafc'
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        aria-expanded={expanded}
+        style={{
+          width: '100%',
+          borderRadius: 6,
+          border: '1px solid #cbd5f5',
+          background: '#fff',
+          padding: '6px 10px',
+          fontSize: 12,
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8
+        }}
+      >
+        <span>{title}</span>
+        <span aria-hidden="true" style={{ fontSize: 10 }}>
+          {expanded ? '▲' : '▼'}
+        </span>
+      </button>
+      <div
+        style={{
+          marginTop: 8,
+          display: expanded ? 'flex' : 'none',
+          gap: 8,
+          flexWrap: 'wrap'
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 interface TableControlsProps {
   onCommand: (command: TableCommand) => void;
 }
 
-export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => {
-  const [expanded, setExpanded] = React.useState(false);
-  const commands = React.useMemo(
-    () => [
+export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => (
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    {[
       {
         label: 'Insert table',
         command: 'insertTable' as TableCommand,
@@ -144,74 +202,30 @@ export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => {
           </svg>
         )
       }
-    ],
-    []
-  );
-
-  return (
-    <div
-      style={{
-        padding: 12,
-        borderRadius: 6,
-        border: '1px solid #e5e7eb',
-        background: '#f8fafc'
-      }}
-    >
+    ].map((item) => (
       <button
+        key={item.command}
         type="button"
-        onClick={() => setExpanded((prev) => !prev)}
+        onClick={() => onCommand(item.command)}
         style={{
-          borderRadius: 6,
-          border: '1px solid #cbd5f5',
+          borderRadius: 4,
+          border: '1px solid #d1d5db',
           background: '#fff',
-          padding: '6px 10px',
-          fontSize: 12,
+          padding: '6px 12px',
           cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6
+          fontSize: 12,
+          display: 'flex',
+          gap: 6,
+          alignItems: 'center'
         }}
-        aria-expanded={expanded}
+        title={item.label}
       >
-        <span>{expanded ? 'Hide table tools' : 'Show table tools'}</span>
-        <span aria-hidden="true" style={{ fontSize: 10 }}>
-          {expanded ? '▲' : '▼'}
-        </span>
+        {item.icon}
+        <span>{item.label}</span>
       </button>
-      <div
-        style={{
-          marginTop: 8,
-          display: expanded ? 'flex' : 'none',
-          gap: 8,
-          flexWrap: 'wrap'
-        }}
-      >
-        {commands.map((item) => (
-          <button
-            key={item.command}
-            type="button"
-            onClick={() => onCommand(item.command)}
-            style={{
-              borderRadius: 4,
-              border: '1px solid #d1d5db',
-              background: '#fff',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              fontSize: 12,
-              display: 'flex',
-              gap: 6,
-              alignItems: 'center'
-            }}
-            title={item.label}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
 
 interface SectionListProps {
   sections: SectionInfo[];
