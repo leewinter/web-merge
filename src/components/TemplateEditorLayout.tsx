@@ -74,9 +74,10 @@ interface TableControlsProps {
   onCommand: (command: TableCommand) => void;
 }
 
-export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => (
-  <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-    {[
+export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => {
+  const [expanded, setExpanded] = React.useState(false);
+  const commands = React.useMemo(
+    () => [
       {
         label: 'Insert table',
         command: 'insertTable' as TableCommand,
@@ -143,30 +144,74 @@ export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => (
           </svg>
         )
       }
-    ].map((item) => (
+    ],
+    []
+  );
+
+  return (
+    <div
+      style={{
+        padding: 12,
+        borderRadius: 6,
+        border: '1px solid #e5e7eb',
+        background: '#f8fafc'
+      }}
+    >
       <button
-        key={item.command}
         type="button"
-        onClick={() => onCommand(item.command)}
+        onClick={() => setExpanded((prev) => !prev)}
         style={{
-          borderRadius: 4,
-          border: '1px solid #d1d5db',
+          borderRadius: 6,
+          border: '1px solid #cbd5f5',
           background: '#fff',
-          padding: '6px 12px',
-          cursor: 'pointer',
+          padding: '6px 10px',
           fontSize: 12,
-          display: 'flex',
-          gap: 6,
-          alignItems: 'center'
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6
         }}
-        title={item.label}
+        aria-expanded={expanded}
       >
-        {item.icon}
-        <span>{item.label}</span>
+        <span>{expanded ? 'Hide table tools' : 'Show table tools'}</span>
+        <span aria-hidden="true" style={{ fontSize: 10 }}>
+          {expanded ? '▲' : '▼'}
+        </span>
       </button>
-    ))}
-  </div>
-);
+      <div
+        style={{
+          marginTop: 8,
+          display: expanded ? 'flex' : 'none',
+          gap: 8,
+          flexWrap: 'wrap'
+        }}
+      >
+        {commands.map((item) => (
+          <button
+            key={item.command}
+            type="button"
+            onClick={() => onCommand(item.command)}
+            style={{
+              borderRadius: 4,
+              border: '1px solid #d1d5db',
+              background: '#fff',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              fontSize: 12,
+              display: 'flex',
+              gap: 6,
+              alignItems: 'center'
+            }}
+            title={item.label}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 interface SectionListProps {
   sections: SectionInfo[];

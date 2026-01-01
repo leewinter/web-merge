@@ -492,20 +492,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
             onToggleMode={togglePlaceholderMode}
             onInsert={insertToken}
           />
-          <div
-            style={{
-              padding: 12,
-              borderRadius: 6,
-              border: '1px solid #e5e7eb',
-              background: '#f8fafc',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8
-            }}
-          >
-            <strong style={{ fontSize: 14 }}>Table controls</strong>
-            <TableControls onCommand={execCommand} />
-          </div>
+          <TableControls onCommand={execCommand} />
           {sectionList.length > 0 && <SectionList sections={sectionList} onEdit={startEditingSection} />}
         </div>
         <div
