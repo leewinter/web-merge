@@ -17,6 +17,7 @@ import type { TableCommand } from './menu/TableControls';
 import { PlaceholderControls, TableControls, RibbonTabs } from './menu';
 import { SectionList, SectionEditorPanel } from './sections';
 import { RenderedPreview } from './preview/RenderedPreview';
+import { useWordExport } from '../word/useWordExport';
 
 const SECTION_WRAPPER_STYLE =
   'background:#fefce8;color:#92400e;border-radius:4px;padding:2px 6px;border:1px solid #fcd34d;display:inline-flex;';
@@ -322,6 +323,8 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     }
   }, [previewTemplate, values]);
 
+  const downloadAsDocx = useWordExport();
+
   const updateValue = (key: string, next: unknown) => {
     setValues((prev) => {
       const nextValues = { ...prev, [key]: next };
@@ -524,7 +527,25 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
       </section>
 
       <section style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: 16, background: '#fff' }}>
-        <h3 style={{ marginTop: 0 }}>Rendered preview</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ marginTop: 0 }}>Rendered preview</h3>
+          <button
+            type="button"
+            onClick={() => {
+              void downloadAsDocx(renderedResult.html);
+            }}
+            style={{
+              borderRadius: 6,
+              border: '1px solid #cbd5f5',
+              background: '#fff',
+              cursor: 'pointer',
+              padding: '6px 12px',
+              fontSize: 12
+            }}
+          >
+            Download as Word
+          </button>
+        </div>
         <RenderedPreview renderedResult={renderedResult} />
         {editingSectionId && (
           <SectionEditorPanel
