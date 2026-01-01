@@ -26,12 +26,28 @@ const placeholders: PlaceholderDefinition[] = [
   }
 ];
 
-const initialTemplate = `Risk Assessment for {{projectName}}
+const initialTemplate = `
+<p>Risk Assessment for {{projectName}}</p>
 
-Prepared by {{responsiblePerson}}.
+<p>Prepared by {{responsiblePerson}}.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Control</th>
+      <th>Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Engage the team</td>
+      <td>{{responsiblePerson}}</td>
+    </tr>
+  </tbody>
+</table>
 
 {{#isHighRisk}}
-This activity has been classified as high risk and requires the controls below.
+<p>This activity has been classified as high risk and requires the controls below.</p>
 {{/isHighRisk}}
 `;
 
