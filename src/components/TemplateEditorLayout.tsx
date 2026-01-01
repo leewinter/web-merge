@@ -1,33 +1,7 @@
 import React from 'react';
 import type { PlaceholderRenderInfo, SectionInfo } from './template-types';
 
-export type EditorCommand = 'bold' | 'italic' | 'underline';
-
-interface TemplateToolbarProps {
-  onCommand: (command: EditorCommand) => void;
-}
-
-export const TemplateToolbar: React.FC<TemplateToolbarProps> = ({ onCommand }) => (
-  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-    {['bold', 'italic', 'underline'].map((command) => (
-      <button
-        key={command}
-        type="button"
-        onClick={() => onCommand(command as EditorCommand)}
-        style={{
-          borderRadius: 4,
-          border: '1px solid #cbd5f5',
-          background: '#fff',
-          padding: '4px 8px',
-          cursor: 'pointer',
-          fontSize: 12
-        }}
-      >
-        {command}
-      </button>
-    ))}
-  </div>
-);
+export type TableCommand = 'insertTable' | 'addRow' | 'addColumn' | 'removeTable';
 
 interface PlaceholderControlsProps {
   placeholders: PlaceholderRenderInfo[];
@@ -92,6 +66,37 @@ export const PlaceholderControls: React.FC<PlaceholderControlsProps> = ({
           {placeholder.label}
         </button>
       </div>
+    ))}
+  </div>
+);
+
+interface TableControlsProps {
+  onCommand: (command: TableCommand) => void;
+}
+
+export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => (
+  <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+    {[
+      { label: 'Insert table', command: 'insertTable' as TableCommand },
+      { label: 'Add row', command: 'addRow' as TableCommand },
+      { label: 'Add column', command: 'addColumn' as TableCommand },
+      { label: 'Remove table', command: 'removeTable' as TableCommand }
+    ].map((item) => (
+      <button
+        key={item.command}
+        type="button"
+        onClick={() => onCommand(item.command)}
+        style={{
+          borderRadius: 4,
+          border: '1px solid #d1d5db',
+          background: '#fff',
+          padding: '6px 12px',
+          cursor: 'pointer',
+          fontSize: 12
+        }}
+      >
+        {item.label}
+      </button>
     ))}
   </div>
 );
