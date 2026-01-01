@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PlaceholderRenderInfo, SectionInfo } from './template-types';
 
-export type TableCommand = 'insertTable' | 'addRow' | 'addColumn' | 'removeTable';
+export type TableCommand = 'insertTable' | 'addRow' | 'addColumn' | 'removeRow' | 'removeColumn' | 'removeTable';
 
 interface PlaceholderControlsProps {
   placeholders: PlaceholderRenderInfo[];
@@ -75,11 +75,13 @@ interface TableControlsProps {
 }
 
 export const TableControls: React.FC<TableControlsProps> = ({ onCommand }) => (
-  <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+    <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
     {[
       { label: 'Insert table', command: 'insertTable' as TableCommand },
       { label: 'Add row', command: 'addRow' as TableCommand },
       { label: 'Add column', command: 'addColumn' as TableCommand },
+      { label: 'Remove row', command: 'removeRow' as TableCommand },
+      { label: 'Remove column', command: 'removeColumn' as TableCommand },
       { label: 'Remove table', command: 'removeTable' as TableCommand }
     ].map((item) => (
       <button

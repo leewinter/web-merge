@@ -2,6 +2,10 @@ import React from 'react';
 import Mustache from 'mustache';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import TableModule from 'quill/modules/table.js';
+
+TableModule.register();
+Quill.register('modules/table', TableModule);
 import type {
   PlaceholderDefinition,
   PlaceholderKind,
@@ -153,10 +157,22 @@ const quillModules = {
   ],
   clipboard: {
     matchVisual: false
-  }
+  },
+  table: true
 };
 
-const quillFormats = ['bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'header', 'code-block'];
+const quillFormats = [
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'list',
+  'bullet',
+  'header',
+  'code-block',
+  'table'
+];
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({
   initialTemplate = '',
@@ -348,45 +364,6 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     [insertHtmlAtCursor, placeholderModes]
   );
 
-  const findClosestTable = React.useCallback((): HTMLTableElement | null => {
-    const quill = getQuillInstance();
-    if (!quill) {
-      return null;
-    }
-    const selectionIndex = quill.getSelection()?.index ?? 0;
-    const leaf = quill.getLeaf(selectionIndex)[0];
-    const dom = (leaf && (leaf as { domNode?: Node }).domNode) as Element | null;
-    const cell = dom?.closest('td,th');
-    return (cell?.closest('table') ?? quill.root.querySelector('table')) as HTMLTableElement | null;
-  }, [getQuillInstance]);
-
-  const insertRowIntoTable = React.useCallback((table: HTMLTableElement) => {
-    const quill = getQuillInstance();
-    if (!quill) {
-      return;
-    }
-    const selectionIndex = quill.getSelection()?.index ?? 0;
-    const leaf = quill.getLeaf(selectionIndex)[0];
-    const dom = (leaf && (leaf as { domNode?: Node }).domNode) as Element | null;
-    const currentRow = dom?.closest('tr') as HTMLTableRowElement | null;
-    const referenceRow = currentRow || (table.rows[table.rows.length - 1] as HTMLTableRowElement | undefined);
-    if (!referenceRow) {
-      return;
-    }
-    const newRow = referenceRow.cloneNode(true) as HTMLTableRowElement;
-    newRow.querySelectorAll('td,th').forEach((cell) => {
-      cell.innerHTML = '<br />';
-    });
-    referenceRow.parentNode?.insertBefore(newRow, referenceRow.nextSibling);
-  }, [getQuillInstance]);
-
-  const insertColumnIntoTable = React.useCallback((table: HTMLTableElement) => {
-    Array.from(table.rows).forEach((row) => {
-      const newCell = row.insertCell(-1);
-      newCell.innerHTML = '<br />';
-    });
-  }, []);
-
   const execCommand = React.useCallback(
     (command: TableCommand) => {
       const quill = getQuillInstance();
@@ -394,46 +371,35 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
         return;
       }
       quill.focus();
+      const tableModule = quill.getModule('table');
+      if (!tableModule) {
+        return;
+      }
+
       switch (command) {
-        case 'insertTable': {
-          const tableHtml = `
-            <table style="width:100%;border-collapse:collapse;">
-              <tr><td>Cell</td><td>Cell</td></tr>
-              <tr><td>Cell</td><td>Cell</td></tr>
-            </table>
-          `;
-          insertHtmlAtCursor(tableHtml);
+        case 'insertTable':
+          tableModule.insertTable(2, 2);
           break;
-        }
-        case 'addRow': {
-          const table = findClosestTable();
-          if (table) {
-            insertRowIntoTable(table);
-            applyHtmlToEditor(quill.root.innerHTML);
-          }
+        case 'addRow':
+          tableModule.insertRowBelow();
           break;
-        }
-        case 'addColumn': {
-          const table = findClosestTable();
-          if (table) {
-            insertColumnIntoTable(table);
-            applyHtmlToEditor(quill.root.innerHTML);
-          }
+        case 'addColumn':
+          tableModule.insertColumnRight();
           break;
-        }
-        case 'removeTable': {
-          const table = findClosestTable();
-          if (table) {
-            table.remove();
-            applyHtmlToEditor(quill.root.innerHTML);
-          }
+        case 'removeRow':
+          tableModule.deleteRow();
           break;
-        }
+        case 'removeColumn':
+          tableModule.deleteColumn();
+          break;
+        case 'removeTable':
+          tableModule.deleteTable();
+          break;
         default:
           break;
       }
     },
-    [applyHtmlToEditor, findClosestTable, insertColumnIntoTable, insertHtmlAtCursor, insertRowIntoTable, getQuillInstance]
+    [getQuillInstance]
   );
 
   const placeholderValues: PlaceholderRenderInfo[] = React.useMemo(
@@ -470,6 +436,16 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
           padding: 2px 6px;
           border: 1px solid #fcd34d;
           display: inline-flex;
+        }
+        .template-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        .template-table th,
+        .template-table td {
+          border: 1px solid #cbd5f5;
+          padding: 8px;
+          text-align: left;
         }
       `;
       document.head.appendChild(style);
