@@ -13,15 +13,10 @@ import type {
   SectionInfo,
   PlaceholderRenderInfo
 } from './template-types';
-import type { TableCommand } from './TemplateEditorLayout';
-import {
-  PlaceholderControls,
-  TableControls,
-  SectionList,
-  SectionEditorPanel,
-  RenderedPreview,
-  RibbonTabs
-} from './TemplateEditorLayout';
+import type { TableCommand } from './menu/TableControls';
+import { PlaceholderControls, TableControls, RibbonTabs } from './menu';
+import { SectionList, SectionEditorPanel } from './sections';
+import { RenderedPreview } from './preview/RenderedPreview';
 
 const SECTION_WRAPPER_STYLE =
   'background:#fefce8;color:#92400e;border-radius:4px;padding:2px 6px;border:1px solid #fcd34d;display:inline-flex;';
