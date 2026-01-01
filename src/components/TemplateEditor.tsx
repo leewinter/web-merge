@@ -18,6 +18,7 @@ import { PlaceholderControls, TableControls, RibbonTabs } from './menu';
 import { SectionList, SectionEditorPanel } from './sections';
 import { RenderedPreview } from './preview/RenderedPreview';
 import { useWordExport } from '../word/useWordExport';
+import { parseDocumentModel } from '../word/template-model';
 
 const SECTION_WRAPPER_STYLE =
   'background:#fefce8;color:#92400e;border-radius:4px;padding:2px 6px;border:1px solid #fcd34d;display:inline-flex;';
@@ -338,6 +339,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     }
   }, [previewTemplate, values]);
 
+  const documentModel = React.useMemo(() => parseDocumentModel(renderedResult.html), [renderedResult.html]);
   const downloadAsDocx = useWordExport();
 
   const updateValue = (key: string, next: unknown) => {
@@ -547,7 +549,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
           <button
             type="button"
             onClick={() => {
-              void downloadAsDocx(renderedResult.html);
+              void downloadAsDocx(documentModel);
             }}
             style={{
               borderRadius: 6,
