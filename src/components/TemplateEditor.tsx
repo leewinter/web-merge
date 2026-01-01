@@ -146,12 +146,19 @@ const collectSectionsFromHtml = (html: string): SectionInfo[] => {
 };
 
 const quillModules = {
-  toolbar: [
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['blockquote', 'code-block'],
-    [{ header: [1, 2, 3, false] }]
-  ],
+  toolbar: {
+    container: [
+      [{ font: [] }, { size: ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike', 'code'],
+      [{ color: [] }, { background: [] }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
+      ['blockquote', 'code-block'],
+      ['clean']
+    ]
+  },
   clipboard: {
     matchVisual: false
   },
@@ -168,7 +175,15 @@ const quillFormats = [
   'bullet',
   'header',
   'code-block',
-  'table'
+  'table',
+  'font',
+  'size',
+  'color',
+  'background',
+  'script',
+  'align',
+  'indent',
+  'code'
 ];
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({
