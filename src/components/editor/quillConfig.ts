@@ -1,6 +1,9 @@
+import Quill from 'quill';
 import TableModule from 'quill/modules/table.js';
+import ImageBlot from 'quill/formats/image';
 
 TableModule.register();
+Quill.register('formats/image', ImageBlot);
 
 export const quillModules = {
   toolbar: {
@@ -13,6 +16,7 @@ export const quillModules = {
       [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
       [{ align: [] }],
       ['blockquote', 'code-block'],
+      ['image'],
       ['clean']
     ]
   },
@@ -40,5 +44,6 @@ export const quillFormats = [
   'script',
   'align',
   'indent',
-  'code'
+  'code',
+  'image'
 ];

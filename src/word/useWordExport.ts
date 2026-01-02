@@ -3,6 +3,7 @@ import {
   AlignmentType,
   Document,
   HeadingLevel,
+  ImageRun,
   LevelFormat,
   Packer,
   Paragraph,
@@ -128,20 +129,82 @@ const buildTable = (model: TableModel): Table =>
     layout: TableLayoutType.FIXED
   });
 
+const decodeBase64Image = (dataUrl: string): Uint8Array | null => {
+  const match = dataUrl.match(/^data:.*;base64,(.*)$/);
+  if (!match) {
+    return null;
+  }
+  const base64 = match[1];
+  const binary = atob(base64);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return array;
+};
+
+const fetchImageData = async (src: string): Promise<Uint8Array | null> => {
+  if (!src) {
+    return null;
+  }
+  const data = decodeBase64Image(src);
+  if (data) {
+    return data;
+  }
+  try {
+    const response = await fetch(src);
+    if (!response.ok) {
+      return null;
+    }
+    const buffer = await response.arrayBuffer();
+    return new Uint8Array(buffer);
+  } catch {
+    return null;
+  }
+};
+
+const buildImageParagraph = async (model: ImageModel): Promise<Paragraph | null> => {
+  const data = await fetchImageData(model.src);
+  if (!data) {
+    return null;
+  }
+  const width = model.width ?? 480;
+  const height = model.height ?? Math.round(width * 0.75);
+  return new Paragraph({
+    children: [
+      new ImageRun({
+        data,
+        transformation: {
+          width,
+          height
+        }
+      })
+    ]
+  });
+};
+
 export const useWordExport = () => {
   return useCallback(async (model: DocumentModel) => {
     if (typeof document === 'undefined') {
       return;
     }
-    const children = model.blocks.flatMap((block) => {
+    const children: Array<Paragraph | Table> = [];
+    for (const block of model.blocks) {
       if (block.type === 'paragraph') {
-        return [buildParagraph(block)];
+        children.push(buildParagraph(block));
+        continue;
       }
       if (block.type === 'table') {
-        return [buildTable(block)];
+        children.push(buildTable(block));
+        continue;
       }
-      return [];
-    });
+      if (block.type === 'image') {
+        const imageParagraph = await buildImageParagraph(block);
+        if (imageParagraph) {
+          children.push(imageParagraph);
+        }
+      }
+    }
     const numberingConfig = Array.from(
       model.blocks
         .filter((block): block is ParagraphModel => block.type === 'paragraph' && !!block.list)

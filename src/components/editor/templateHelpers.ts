@@ -57,13 +57,24 @@ export const wrapSections = (template: string, placeholders: PlaceholderDefiniti
   });
 };
 
+const shouldSkipHighlight = (source: string, offset: number, length: number) => {
+  const beforeChar = source[offset - 1];
+  return beforeChar === '"' || beforeChar === "'" || beforeChar === '=';
+};
+
 const parsePlaceholderToken = (
   match: string,
   key: string,
   placeholderKeys: string[],
-  placeholderMap: Record<string, string>
+  placeholderMap: Record<string, string>,
+  source: string,
+  offset: number
 ) => {
   if (!placeholderKeys.includes(key)) {
+    return match;
+  }
+
+  if (shouldSkipHighlight(source, offset, match.length)) {
     return match;
   }
 
@@ -82,9 +93,9 @@ export const templateToEditorContent = (template: string, placeholders: Placehol
   }, {});
   const withSections = wrapSections(template, placeholders);
   const keys = placeholders.map((p) => p.key);
-  return withSections.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (match, key) =>
-    parsePlaceholderToken(match, key, keys, placeholderMap)
-  );
+  return withSections.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, function replace(match, key, offset) {
+    return parsePlaceholderToken(match, key, keys, placeholderMap, withSections, offset);
+  });
 };
 
 export const stripHighlightSpans = (html: string) => {

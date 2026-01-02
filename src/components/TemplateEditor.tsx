@@ -225,6 +225,73 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     [insertHtmlAtCursor, placeholderModes]
   );
 
+  const insertImageAtCursor = React.useCallback(
+    (src: string) => {
+      const quill = getQuillInstance();
+      if (!quill) {
+        return;
+      }
+      const index = quill.getSelection()?.index ?? quill.getLength();
+      quill.insertEmbed(index, 'image', src);
+      quill.setSelection(index + 1);
+    },
+    [getQuillInstance]
+  );
+
+  const readFileAsDataUrl = React.useCallback((file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('Unable to parse image'));
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
+  const handleImageInsert = React.useCallback(async () => {
+    const useUrl = window.confirm('Paste an image URL? Click "Cancel" to upload from your device.');
+    if (useUrl) {
+      const url = window.prompt('Enter the image URL');
+      if (url) {
+        insertImageAtCursor(url);
+      }
+      return;
+    }
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) {
+        return;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        insertImageAtCursor(dataUrl);
+      } catch (error) {
+        console.error('Unable to read image', error);
+      }
+    };
+    input.click();
+  }, [insertImageAtCursor, readFileAsDataUrl]);
+
+  React.useEffect(() => {
+    const quill = quillInstanceRef.current;
+    if (!quill) {
+      return;
+    }
+    const toolbar = quill.getModule('toolbar');
+    if (!toolbar) {
+      return;
+    }
+    toolbar.addHandler('image', handleImageInsert);
+  }, [handleImageInsert]);
+
   const execCommand = React.useCallback(
     (command: TableCommand) => {
       const quill = getQuillInstance();

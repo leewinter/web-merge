@@ -21,6 +21,12 @@ const placeholders: PlaceholderDefinition[] = [
     kind: 'section',
     sectionContent: `Content goes here`,
     sampleValue: true
+  },
+  {
+    key: 'siteImage',
+    label: 'Site image',
+    description: 'Embedded reference photo for the project.',
+    sampleValue: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80'
   }
 ];
 
