@@ -121,6 +121,7 @@
   gap: 8px;
 }
 
+
 .image-dialog-upload[data-disabled='true'] {
   opacity: 0.5;
   pointer-events: none;

@@ -1,6 +1,6 @@
 import React from 'react';
 import Mustache from 'mustache';
-import Quill from 'quill';
+import Quill, { type RangeStatic } from 'quill';
 import 'quill/dist/quill.snow.css';
 import type {
   PlaceholderDefinition,
@@ -27,6 +27,15 @@ import {
 } from './editor/templateHelpers';
 import { ImageInsertDialog } from './editor/ImageInsertDialog';
 import './TemplateEditor.css';
+
+const TOOLTIP_MAP: Array<{ selector: string; title: string }> = [
+  { selector: '.ql-bold', title: 'Bold (Ctrl+B)' },
+  { selector: '.ql-italic', title: 'Italic (Ctrl+I)' },
+  { selector: '.ql-underline', title: 'Underline (Ctrl+U)' },
+  { selector: '.ql-list.ql-ordered', title: 'Numbered list' },
+  { selector: '.ql-list.ql-bullet', title: 'Bullet list' },
+  { selector: '.ql-align', title: 'Text alignment' }
+];
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({
   initialTemplate = '',
@@ -62,6 +71,17 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     [onTemplateChange]
   );
 
+  const syncEditorFromQuill = React.useCallback(() => {
+    const quill = getQuillInstance();
+    if (!quill) {
+      return;
+    }
+    const html = quill.root.innerHTML;
+    setEditorHtml(html);
+    updatePreviewFromHtml(html);
+  }, [getQuillInstance, updatePreviewFromHtml]);
+
+
   const applyHtmlToEditor = React.useCallback(
     (html: string) => {
       // Only mutate Quill when the editor exists; otherwise keep the string around for later initialization.
@@ -90,10 +110,19 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     });
     quillInstanceRef.current = quill;
 
+    const toolbarModule = quill.getModule('toolbar') as { container?: HTMLElement } | null;
+    const toolbarContainer = toolbarModule?.container;
+    if (toolbarContainer) {
+      TOOLTIP_MAP.forEach(({ selector, title }) => {
+        const element = toolbarContainer.querySelector(selector);
+        if (element && !element.getAttribute('title')) {
+          element.setAttribute('title', title);
+        }
+      });
+    }
+
     const handleChange = () => {
-      const html = quill.root.innerHTML;
-      setEditorHtml(html);
-      updatePreviewFromHtml(html);
+      syncEditorFromQuill();
     };
 
     quill.on('text-change', handleChange);
@@ -103,7 +132,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
       quill.off('text-change', handleChange);
       quillInstanceRef.current = null;
     };
-  }, [applyHtmlToEditor, updatePreviewFromHtml]);
+  }, [applyHtmlToEditor, syncEditorFromQuill]);
 
   const syncEditorContent = React.useCallback(
     (preview: string) => {
@@ -402,7 +431,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
                 key: 'tables',
                 label: 'Table tools',
                 content: <TableControls onCommand={execCommand} />
-              }
+              },
             ]}
           />
           {sectionList.length > 0 && <SectionList sections={sectionList} onEdit={startEditingSection} />}
