@@ -1,5 +1,7 @@
 # Web Merge React Component Library
 
+![web-merge logo](.storybook/logo.png)
+
 Opinionated React component primitives shipped as a TypeScript library. Build artifacts land under `dist/` and the `TemplateEditor` component is the exported entry point; placeholder values originate from your data layer (no inline editing in the canvas), while the editor surface now runs a Quill-powered WYSIWYG canvas with formatting commands, table support, and the ability to edit section content before insertion.
 
 ## Getting started
