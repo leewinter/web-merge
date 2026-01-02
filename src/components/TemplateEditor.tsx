@@ -25,6 +25,7 @@ import {
   stripHighlightSpans,
   templateToEditorContent
 } from './editor/templateHelpers';
+import { ImageInsertDialog } from './editor/ImageInsertDialog';
 import './TemplateEditor.css';
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({
@@ -253,32 +254,16 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     });
   }, []);
 
-  const handleImageInsert = React.useCallback(async () => {
-    const useUrl = window.confirm('Paste an image URL? Click "Cancel" to upload from your device.');
-    if (useUrl) {
-      const url = window.prompt('Enter the image URL');
-      if (url) {
-        insertImageAtCursor(url);
-      }
-      return;
-    }
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) {
-        return;
-      }
-      try {
-        const dataUrl = await readFileAsDataUrl(file);
-        insertImageAtCursor(dataUrl);
-      } catch (error) {
-        console.error('Unable to read image', error);
-      }
-    };
-    input.click();
-  }, [insertImageAtCursor, readFileAsDataUrl]);
+  const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
+  const openImageDialog = React.useCallback(() => setImageDialogOpen(true), []);
+  const closeImageDialog = React.useCallback(() => setImageDialogOpen(false), []);
+  const handleImageDialogInsert = React.useCallback(
+    (src: string) => {
+      insertImageAtCursor(src);
+      closeImageDialog();
+    },
+    [insertImageAtCursor, closeImageDialog]
+  );
 
   React.useEffect(() => {
     const quill = quillInstanceRef.current;
@@ -289,8 +274,8 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     if (!toolbar) {
       return;
     }
-    toolbar.addHandler('image', handleImageInsert);
-  }, [handleImageInsert]);
+    toolbar.addHandler('image', openImageDialog);
+  }, [openImageDialog]);
 
   const execCommand = React.useCallback(
     (command: TableCommand) => {
@@ -452,6 +437,12 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
           />
         )}
       </section>
+      <ImageInsertDialog
+        open={imageDialogOpen}
+        onClose={closeImageDialog}
+        onInsert={handleImageDialogInsert}
+        readFileAsDataUrl={readFileAsDataUrl}
+      />
     </div>
   );
 };
