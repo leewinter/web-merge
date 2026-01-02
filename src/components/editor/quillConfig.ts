@@ -1,9 +1,11 @@
-import Quill from 'quill';
+import Quill from './quillSetup';
 import TableModule from 'quill/modules/table.js';
 import ImageBlot from 'quill/formats/image';
+import ImageResize from 'quill-image-resize-module';
 
 TableModule.register();
 Quill.register('formats/image', ImageBlot);
+Quill.register('modules/imageResize', ImageResize);
 
 export const quillModules = {
   toolbar: {
@@ -22,6 +24,10 @@ export const quillModules = {
   },
   clipboard: {
     matchVisual: false
+  },
+  imageResize: {
+    displayStyles: true,
+    modules: [ 'Resize', 'DisplaySize', 'Toolbar' ]
   },
   table: true
 };
