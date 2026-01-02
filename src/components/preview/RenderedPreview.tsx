@@ -1,8 +1,8 @@
 import React from 'react';
 
-const previewListStyles = `
-  .rendered-preview ol[data-list='bullet'] {
-    list-style-type: disc;
+  const previewStyles = `
+    .rendered-preview ol[data-list='bullet'] {
+      list-style-type: disc;
     list-style-position: outside;
     margin-left: 1.3rem;
   }
@@ -19,6 +19,20 @@ const previewListStyles = `
   }
   .rendered-preview li {
     counter-reset: none;
+  }
+  .rendered-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #cbd5f5;
+    margin: 12px 0;
+  }
+  .rendered-preview td,
+  .rendered-preview th {
+    border: 1px solid #cbd5f5;
+    padding: 8px;
+  }
+  .rendered-preview td[data-row^='row-'] {
+    border: 1px solid #cbd5f5;
   }
 `;
 
@@ -37,7 +51,7 @@ export const RenderedPreview: React.FC<RenderedPreviewProps> = ({ renderedResult
       fontFamily: 'Inter, sans-serif'
     }}
   >
-    <style>{previewListStyles}</style>
+    <style>{previewStyles}</style>
     {renderedResult.isError ? (
       <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{renderedResult.html}</pre>
     ) : (
