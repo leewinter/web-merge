@@ -8,8 +8,10 @@ import {
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
-  TextRun
+  TextRun,
+  WidthType
 } from 'docx';
 import type { DocumentModel, ParagraphModel, TableModel, TextRunModel } from './template-model';
 
@@ -118,7 +120,12 @@ const buildTable = (model: TableModel): Table =>
             })
         )
       })
-    )
+    ),
+    width: {
+      size: 100,
+      type: WidthType.PERCENTAGE
+    },
+    layout: TableLayoutType.FIXED
   });
 
 export const useWordExport = () => {
