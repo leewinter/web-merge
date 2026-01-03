@@ -3,37 +3,46 @@ import React from 'react';
   const previewStyles = `
     .rendered-preview ol[data-list='bullet'] {
       list-style-type: disc;
-    list-style-position: outside;
-    margin-left: 1.3rem;
-  }
-  .rendered-preview li[data-list='bullet'] {
-    list-style-type: disc;
-  }
-  .rendered-preview ol[data-list='ordered'] {
-    list-style-type: decimal;
-    list-style-position: outside;
-    margin-left: 1.3rem;
-  }
-  .rendered-preview li[data-list='ordered'] {
-    list-style-type: decimal;
-  }
-  .rendered-preview li {
-    counter-reset: none;
-  }
-  .rendered-preview table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid #cbd5f5;
-    margin: 12px 0;
-  }
-  .rendered-preview td,
-  .rendered-preview th {
-    border: 1px solid #cbd5f5;
-    padding: 8px;
-  }
-  .rendered-preview td[data-row^='row-'] {
-    border: 1px solid #cbd5f5;
-  }
+      list-style-position: outside;
+      margin-left: 1.3rem;
+    }
+    .rendered-preview li[data-list='bullet'] {
+      list-style-type: disc;
+    }
+    .rendered-preview ol[data-list='ordered'] {
+      list-style-type: decimal;
+      list-style-position: outside;
+      margin-left: 1.3rem;
+    }
+    .rendered-preview li[data-list='ordered'] {
+      list-style-type: decimal;
+    }
+    .rendered-preview li {
+      counter-reset: none;
+    }
+    .rendered-preview table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #cbd5f5;
+      margin: 12px 0;
+    }
+    .rendered-preview td,
+    .rendered-preview th {
+      border: 1px solid #cbd5f5;
+      padding: 8px;
+    }
+    .rendered-preview td[data-row^='row-'] {
+      border: 1px solid #cbd5f5;
+    }
+    .rendered-preview .ql-align-center {
+      text-align: center;
+    }
+    .rendered-preview .ql-align-right {
+      text-align: right;
+    }
+    .rendered-preview .ql-align-justify {
+      text-align: justify;
+    }
 `;
 
 interface RenderedPreviewProps {
