@@ -1,6 +1,6 @@
 import React from 'react';
 import Mustache from 'mustache';
-import Quill, { type RangeStatic } from 'quill';
+import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import type {
   PlaceholderDefinition,
@@ -20,8 +20,11 @@ import {
   buildInitialValues,
   buildInitialModes,
   collectSectionsFromHtml,
+  escapeAttribute,
   formatSectionToken,
+  generateSectionId,
   placeholderSupportsSection,
+  SECTION_WRAPPER_STYLE,
   stripHighlightSpans,
   templateToEditorContent
 } from './editor/templateHelpers';
@@ -299,7 +302,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     if (!quill) {
       return;
     }
-    const toolbar = quill.getModule('toolbar');
+    const toolbar = quill.getModule('toolbar') as { addHandler?: (name: string, handler: () => void) => void };
     if (!toolbar) {
       return;
     }
@@ -313,7 +316,14 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
         return;
       }
       quill.focus();
-      const tableModule = quill.getModule('table');
+    const tableModule = quill.getModule('table') as {
+      insertTable?: (rows: number, cols: number) => void;
+      insertRowBelow?: () => void;
+      insertColumnRight?: () => void;
+      deleteRow?: () => void;
+      deleteColumn?: () => void;
+      deleteTable?: () => void;
+    };
       if (!tableModule) {
         return;
       }

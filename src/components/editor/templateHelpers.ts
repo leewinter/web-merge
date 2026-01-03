@@ -1,9 +1,9 @@
 import type { PlaceholderDefinition, PlaceholderKind, SectionInfo } from '../template-types';
 
-const SECTION_WRAPPER_STYLE =
+export const SECTION_WRAPPER_STYLE =
   'background:#fefce8;color:#92400e;border-radius:4px;padding:2px 6px;border:1px solid #fcd34d;display:inline-flex;';
 
-const escapeAttribute = (value: string) =>
+export const escapeAttribute = (value: string) =>
   value
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -11,7 +11,7 @@ const escapeAttribute = (value: string) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-const generateSectionId = (() => {
+export const generateSectionId = (() => {
   let id = 1;
   return () => `section-${id++}`;
 })();
