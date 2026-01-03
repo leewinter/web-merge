@@ -89,7 +89,6 @@ const mapRun = (run: TextRunModel): TextRun =>
     font: run.styles.font,
     size: normalizeSize(run.styles.size),
     color: toHex(run.styles.color),
-    // Docx highlight only supports named colors; skip hex values to avoid invalid XML.
     verticalAlign: run.styles.script === 'super' ? 'superscript' : run.styles.script === 'sub' ? 'subscript' : undefined
   });
 
@@ -179,7 +178,8 @@ const buildImageParagraph = async (model: ImageModel): Promise<Paragraph | null>
           height
         }
       })
-    ]
+    ],
+    alignment: alignmentMap[model.align]
   });
 };
 

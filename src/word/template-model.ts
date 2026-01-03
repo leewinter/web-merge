@@ -49,6 +49,7 @@ export interface ImageModel {
   alt?: string;
   width?: number;
   height?: number;
+  align?: ParagraphModel['align'];
 }
 
 export type DocumentBlock = ParagraphModel | TableModel | ImageModel;
@@ -138,9 +139,34 @@ const collectTextRuns = (node: ChildNode, styles: InlineStyles = {}): TextRunMod
   return Array.from(element.childNodes).flatMap((child) => collectTextRuns(child, nextStyles));
 };
 
+const deriveAlignFromElement = (element: Element | null): ParagraphModel['align'] | undefined => {
+  if (!element) {
+    return undefined;
+  }
+  const alignAttr = element.getAttribute('align')?.toLowerCase();
+  if (alignAttr === 'left' || alignAttr === 'center' || alignAttr === 'right' || alignAttr === 'justify') {
+    return alignAttr as ParagraphModel['align'];
+  }
+  const styles = parseStyleAttribute(element.getAttribute('style'));
+  if (styles['text-align']) {
+    const value = styles['text-align'].toLowerCase();
+    if (['left', 'center', 'right', 'justify'].includes(value)) {
+      return value as ParagraphModel['align'];
+    }
+  }
+  const match = Array.from(element.classList).find((cls) => cls.startsWith('ql-align-'));
+  if (match) {
+    const value = match.replace('ql-align-', '');
+    if (['left', 'center', 'right', 'justify'].includes(value)) {
+      return value as ParagraphModel['align'];
+    }
+  }
+  return undefined;
+};
+
 const buildParagraph = (element: Element, list?: ListMetadata): ParagraphModel => {
   const runs = collectTextRuns(element);
-  const align = element.getAttribute('align') as ParagraphModel['align'];
+  const align = deriveAlignFromElement(element);
   const heading = HEADER_TAGS[element.tagName] ?? undefined;
   return {
     type: 'paragraph',
@@ -256,12 +282,17 @@ export const parseDocumentModel = (html: string): DocumentModel => {
 
     if (element.tagName === 'IMG') {
       flushListState();
+      const align =
+        deriveAlignFromElement(element) ??
+        deriveAlignFromElement(element.parentElement) ??
+        undefined;
       blocks.push({
         type: 'image',
         src: element.getAttribute('src') ?? '',
         alt: element.getAttribute('alt') ?? undefined,
         width: element.hasAttribute('width') ? Number(element.getAttribute('width')) : undefined,
-        height: element.hasAttribute('height') ? Number(element.getAttribute('height')) : undefined
+        height: element.hasAttribute('height') ? Number(element.getAttribute('height')) : undefined,
+        align
       });
       return;
     }
