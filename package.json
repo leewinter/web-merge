@@ -33,7 +33,8 @@
   "dependencies": {
     "docx": "^8.0.0",
     "mustache": "^4.2.0",
-    "quill": "^2.0.0"
+    "quill": "^2.0.0",
+    "quill-image-resize-module": "^3.0.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
@@ -44,9 +45,9 @@
     "@storybook/react": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
     "@types/mustache": "^4.2.6",
+    "@types/quill": "^1.3.10",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/quill": "^1.3.10",
     "@vitest/browser-playwright": "^4.0.16",
     "@vitest/coverage-v8": "^4.0.16",
     "playwright": "^1.57.0",
