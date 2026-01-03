@@ -302,11 +302,10 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
     if (!quill) {
       return;
     }
-    const toolbar = quill.getModule('toolbar') as { addHandler?: (name: string, handler: () => void) => void };
-    if (!toolbar) {
-      return;
+    const toolbar = quill.getModule('toolbar');
+    if (toolbar && typeof (toolbar as { addHandler?: (name: string, handler: () => void) => void }).addHandler === 'function') {
+      (toolbar as { addHandler: (name: string, handler: () => void) => void }).addHandler('image', openImageDialog);
     }
-    toolbar.addHandler('image', openImageDialog);
   }, [openImageDialog]);
 
   const execCommand = React.useCallback(
@@ -316,36 +315,36 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
         return;
       }
       quill.focus();
-    const tableModule = quill.getModule('table') as {
-      insertTable?: (rows: number, cols: number) => void;
-      insertRowBelow?: () => void;
-      insertColumnRight?: () => void;
-      deleteRow?: () => void;
-      deleteColumn?: () => void;
-      deleteTable?: () => void;
-    };
+      const tableModule = quill.getModule('table') as {
+        insertTable?: (rows: number, cols: number) => void;
+        insertRowBelow?: () => void;
+        insertColumnRight?: () => void;
+        deleteRow?: () => void;
+        deleteColumn?: () => void;
+        deleteTable?: () => void;
+      } | null;
       if (!tableModule) {
         return;
       }
 
       switch (command) {
         case 'insertTable':
-          tableModule.insertTable(2, 2);
+          tableModule.insertTable?.(2, 2);
           break;
         case 'addRow':
-          tableModule.insertRowBelow();
+          tableModule.insertRowBelow?.();
           break;
         case 'addColumn':
-          tableModule.insertColumnRight();
+          tableModule.insertColumnRight?.();
           break;
         case 'removeRow':
-          tableModule.deleteRow();
+          tableModule.deleteRow?.();
           break;
         case 'removeColumn':
-          tableModule.deleteColumn();
+          tableModule.deleteColumn?.();
           break;
         case 'removeTable':
-          tableModule.deleteTable();
+          tableModule.deleteTable?.();
           break;
         default:
           break;
