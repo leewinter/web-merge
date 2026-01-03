@@ -14,7 +14,7 @@ import {
   TextRun,
   WidthType
 } from 'docx';
-import type { DocumentModel, ParagraphModel, TableModel, TextRunModel } from './template-model';
+import type { DocumentModel, ListMetadata, ParagraphModel, TableModel, TextRunModel } from './template-model';
 
 const alignmentMap: Record<ParagraphModel['align'] | undefined, AlignmentType | undefined> = {
   left: AlignmentType.LEFT,
@@ -89,7 +89,7 @@ const mapRun = (run: TextRunModel): TextRun =>
     font: run.styles.font,
     size: normalizeSize(run.styles.size),
     color: toHex(run.styles.color),
-    highlight: toHex(run.styles.background),
+    // Docx highlight only supports named colors; skip hex values to avoid invalid XML.
     verticalAlign: run.styles.script === 'super' ? 'superscript' : run.styles.script === 'sub' ? 'subscript' : undefined
   });
 
@@ -205,23 +205,42 @@ export const useWordExport = () => {
         }
       }
     }
-    const numberingConfig = Array.from(
-      model.blocks
-        .filter((block): block is ParagraphModel => block.type === 'paragraph' && !!block.list)
-        .reduce<Map<string, ParagraphModel['list']>>((acc, block) => {
-          acc.set(block.list!.reference, block.list!);
-          return acc;
-        }, new Map())
-    ).map(([reference, list]) => ({
+    const numberingMap = new Map<
+      string,
+      {
+        type: ListMetadata['type'];
+        levels: Map<number, { indent: number; type: ListMetadata['type']; start?: number }>;
+      }
+    >();
+    model.blocks.forEach((block) => {
+      if (block.type !== 'paragraph' || !block.list) {
+        return;
+      }
+      const existing = numberingMap.get(block.list.reference);
+      const levels = existing?.levels ?? new Map();
+      if (!levels.has(block.list.indent)) {
+        levels.set(block.list.indent, {
+          indent: block.list.indent,
+          type: block.list.type,
+          start: block.list.start
+        });
+      }
+      numberingMap.set(block.list.reference, {
+        type: block.list.type,
+        levels
+      });
+    });
+    const numberingConfig = Array.from(numberingMap.entries()).map(([reference, entry]) => ({
       reference,
-      levels: [
-        {
-          level: list.indent,
-          format: list.type === 'bullet' ? LevelFormat.BULLET : LevelFormat.DECIMAL,
-          text: list.type === 'bullet' ? '•' : '%1.',
-          alignment: AlignmentType.LEFT
-        }
-      ]
+      levels: Array.from(entry.levels.values())
+        .sort((a, b) => a.indent - b.indent)
+        .map((level) => ({
+          level: level.indent,
+          format: level.type === 'bullet' ? LevelFormat.BULLET : LevelFormat.DECIMAL,
+          text: level.type === 'bullet' ? '•' : '%1.',
+          alignment: AlignmentType.LEFT,
+          ...(level.start ? { start: level.start } : {})
+        }))
     }));
     const doc = new Document({
       sections: [{ children }],
